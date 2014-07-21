@@ -4,7 +4,8 @@
 
 ### extract pattern according to differernt structure
 import sys
-sys.path.append('pymodules')
+sys.path.append('../pymodules')
+sys.path.append('../')
 import config
 import logging, json
 import pymongo
@@ -19,7 +20,7 @@ mc = pymongo.Connection(config.mongo_addr)
 
 
 # verb_frame = (['VB'], [('prep', 0), ('subj',0), ('obj',0)]) ## for LJ40K: I love you
-verb_frame = (['V'],  [('prep', 0), ('subj',0), ('obj',0)], ('advmod', 0)) ## for NTCIR
+verb_frame = (['V'],  [('prep', 0), ('subj',0), ('obj',0), ('advmod',0)]) ## for NTCIR
 # be_status = (['JJ'], [('subj',1), ('cop', 1)]) ## for LJ40K: I am happy
 be_status = (['VC'],  [('top',1), ('attr', 1)]) ## for NTCIR
 
@@ -194,56 +195,44 @@ def extract_pattern(sent, targets, rule):
 # }
 def run(targets_rules):
 
-    udocIDs = co_deps.distinct('udocID')
-
-    MaxudocID = max(udocIDs)
-    
-
     for targets, rule in targets_rules:
         
         rule_str = color.render(' '.join([str(x)+','+str(y) for x,y in rule]), 'lightblue')
 
-        for udocID in udocIDs:
+        for sent in co_sents.find():
 
-            logging.info(' process %d/%d; rule: %s' % (udocID, MaxudocID, rule_str))
+            sent_deps = list(co_deps.find({'usentID':sent['usentID']}))
+            ## extract patterns in each sentence
+            pats = extract_pattern(sent_deps, targets, rule)
 
-            doc = list(co_deps.find( {'udocID':udocID} ))
-
-            ## extract all sentences in one document
-            sents = extract_sents(doc)
-
-            for sent in sents:
-
-                ## extract patterns in each sentence
-                pats = extract_pattern(sent, targets, rule)
-
-                ## display results
-                if config.verbose:
-                    sent_str = ' '.join([k[0] for k in sorted(set(reduce(lambda x,y:x+y, [((d['x'],d['xIdx']), (d['y'],d['yIdx'])) for d in sent])), key=lambda a:a[1])][1:] )
-                    logging.debug('%s (%d)' % (sent_str, len(pats)))
-                    for p in pats:
-                        pat_str = ' '.join([x[0] for x in p['pat']])
-                        logging.debug('   %s %.1f' % (color.render(pat_str.lower(), 'g'), p['weight']))
-
-                ## store back in mongo
+            ## display results
+            if config.verbose:
+                sent_str = ' '.join([k[0] for k in sorted(set(reduce(lambda x,y:x+y, [((d['x'],d['xIdx']), (d['y'],d['yIdx'])) for d in sent])), key=lambda a:a[1])][1:] )
+                logging.debug('%s (%d)' % (sent_str, len(pats)))
                 for p in pats:
-                    mdoc = {
-                        'sent_length':      sent[0]['sent_length'],
-                        'udocID':           sent[0]['udocID'],
-                        'usentID':          sent[0]['usentID'],
-                        config.category:    sent[0][config.category],
+                    pat_str = ' '.join([x[0] for x in p['pat']])
+                    logging.debug('   %s %.1f' % (color.render(pat_str.lower(), 'g'), p['weight']))
 
-                        'pattern_length':   len(p['pat']),
-                        'pattern':          ' '.join([x[0] for x in p['pat']]),
-                        'rule':             p['matched_rule'],
+            ## store back in mongo
+            for p in pats:
+                mdoc = {
+                    'sent_length':      sent['sent_length'],
+ #                   'udocID':           sent[0]['udocID'],
+                    'usentID':          sent['usentID'],
+                    #config.category:    sent[0][config.category],
+                    'emoID':            sent['emoID'],
+                    'emotion':          sent['emotion'],
+                    'pattern_length':   len(p['pat']),
+                    'pattern':          ' '.join([x[0] for x in p['pat']]),
+                    'rule':             p['matched_rule'],
 
-                        'anchor':           p['anchor'][0],
-                        'anchor_type':      p['anchor'][1],
-                        'anchor_idx':       p['anchor'][2],
-
-                        'weight':           p['weight']
-                    }
-                    co_pats.insert(mdoc)
+                    'anchor':           p['anchor'][0],
+                    'anchor_type':      p['anchor'][1],
+                    'anchor_idx':       p['anchor'][2],
+                    
+                    'weight':           p['weight']
+                }
+                co_pats.insert(mdoc)
 
 if __name__ == '__main__':
 
@@ -278,6 +267,7 @@ if __name__ == '__main__':
     ## dest
     co_pats = db[config.co_pats_name]
 
+    co_sents = db[config.co_sents_name]
     ### check whether destination collection is empty or not
     dest_cos = [co_pats]
     dest_cos_status = {co.name : co.count() for co in dest_cos}
