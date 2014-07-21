@@ -74,8 +74,8 @@ class DependencyExtracter:
                     idx += 1
 
                 if sections & 4:
-                    print len(block[idx])
-                    if block[idx] != '\n':
+#                    print len(block[idx])
+                    if len(block[idx]) != 0:
                         self.insert_deps(block[idx], mapID, word_pos_list)
 
                 self.usentID += 1
@@ -143,5 +143,5 @@ class DependencyExtracter:
 
 if __name__ == '__main__':
     d = DependencyExtracter('doraemon.iis.sinica.edu.tw', 'kimo', '../emoID')
-    d.process_parsed_files('/corpus/kimo/parsed', 'emotion', int('111', 2))
+    d.process_parsed_files('/corpus/kimo/parsed.new', 'emotion', int('111', 2))
 
