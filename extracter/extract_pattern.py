@@ -207,7 +207,7 @@ def run(targets_rules):
 
             ## display results
             if config.verbose:
-                sent_str = ' '.join([k[0] for k in sorted(set(reduce(lambda x,y:x+y, [((d['x'],d['xIdx']), (d['y'],d['yIdx'])) for d in sent])), key=lambda a:a[1])][1:] )
+                sent_str = ' '.join([k[0] for k in sorted(set(reduce(lambda x,y:x+y, [((d['x'],d['xIdx']), (d['y'],d['yIdx'])) for d in sent_deps])), key=lambda a:a[1])][1:] )
                 logging.debug('%s (%d)' % (sent_str, len(pats)))
                 for p in pats:
                     pat_str = ' '.join([x[0] for x in p['pat']])
