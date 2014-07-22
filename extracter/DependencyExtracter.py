@@ -52,7 +52,7 @@ class DependencyExtracter:
         for filename in os.listdir(corpus_root):   
             if filename[0] == 'R': continue
             print "processing document %s" % filename 
-            mapID = filename.strip('.')[0]
+            mapID = filename.split('.')[0]
             ## load parsed text
             fpath = os.path.join(corpus_root, filename) 
             doc = codecs.open(fpath, 'r', 'utf-8').read().split('\n\n')
@@ -62,8 +62,8 @@ class DependencyExtracter:
                 idx = 0
                 word_pos_list = []
                 
-                if block[idx] == '\n':
-                    print 'yes'
+          #      if block[idx] == '\n':
+           #         print 'yes'
 
                 if sections & 1:
                     word_pos_list = self.insert_sents(block[idx], mapID)
