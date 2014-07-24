@@ -49,18 +49,23 @@ class FeatureExtractor(object):
 			features = Counter()
 			for pat_mdoc in self._db['pats'].find({'usentID': sent_mdoc['usentID']}):
 
-				if 'weighted' in options and options['weighted'] == True:
-					features[ pat_mdoc['emotion'] ] += pat_mdoc['weight'] # if weighted
+				## fetch lexicon to get dist
+				lexicon_mdoc = self._db['lexicon.nested'].find_one({'pattern': pat_mdoc['pattern'] })
+				if not lexicon_mdoc:
+					continue
 				else:
-					features[ pat_mdoc['emotion'] ] += 1
+					## aggregate counts
+					weight = pat_mdoc['weight'] if 'weighted' in options and options['weighted'] == True else 1.0
+					for emotion, count in lexicon_mdoc['count'].items():
+						features[emotion] += count*weight
 
 			mdoc = {
 				'setting': setting_id,				# <str>
 				'usentID': sent_mdoc['usentID'],	# <int>
 				'emotion': sent_mdoc['emotion'],	# <str>
-				'feature': dict(features), 			# <dict>
+				'feature': dict(features),			# <dict>
 			}
-
+			
 			logging.debug('insert pats in usentID: %d' % (sent_mdoc['usentID']) )
 
 			self._db['features.pattern_emotion'].insert(mdoc)
