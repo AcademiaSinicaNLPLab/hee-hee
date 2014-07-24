@@ -71,7 +71,11 @@ class FeatureExtractor(object):
 
 if __name__ == '__main__':
 	
-	Ext = FeatureExtractor(mongo_addr="doraemon.iis.sinica.edu.tw", db_name="kimo", verbose=True)
+	Ext = FeatureExtractor(mongo_addr="doraemon.iis.sinica.edu.tw", db_name="kimo", verbose=False)
+	
+	options = {
+		'weighted': True
+	}
 
-	Ext.PatternEmotion()
+	Ext.PatternEmotion(options)
 
