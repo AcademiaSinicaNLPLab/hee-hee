@@ -1,0 +1,4 @@
+argparse==1.2.1
+jianfan==0.0.2
+jieba==0.32
+wsgiref==0.1.2
