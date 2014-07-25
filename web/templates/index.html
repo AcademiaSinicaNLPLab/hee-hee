@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" type="text/css">
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript" src="{{ url_for('static', filename='js/particle.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+
+<input type="text" />
+<hr/>
+<div></div>
+{% endblock %}
