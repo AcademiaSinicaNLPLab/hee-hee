@@ -1,0 +1,67 @@
+.hide
+{
+	display: none;
+}
+	.slogan
+	{
+
+	}
+		.slogan h1
+		{
+			/*background: red;*/
+			font-size: 4.5em;
+			color: #ce5455;
+		}
+
+	.res-wrap
+	{
+		font-family: Verdana;
+		font-size: 24px;	
+	}
+		.token
+		{
+			padding: 10px;
+		}
+		.token:nth-child(odd)
+		{
+			color: #109618;
+		}
+		.token:nth-child(even)
+		{
+			color: #444;
+		}
+
+html, body 
+{
+	margin: 0;
+	padding: 0;
+	clear: both;
+
+	width: 100%;
+}
+
+	input.input-area
+	{
+		width: 100%;
+		height: 48px;
+		font-family: Verdana;
+		font-size: 20px;
+		outline: none;
+		border: 1px solid #aaa;
+		border-radius: 3px;
+		padding: 12px;
+		color: #444;
+	}
+
+	.block
+	{
+		margin-top: 32px;
+	}
+
+footer 
+{
+	position: fixed;
+	bottom: 5px;
+	right: 10px;
+	color: #666;
+}

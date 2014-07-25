@@ -1,16 +1,49 @@
 {% extends "base.html" %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" type="text/css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" type="text/css">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
 {% endblock %}
 
 {% block extra_js %}
-<script type="text/javascript" src="{{ url_for('static', filename='js/particle.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/main.js') }}"></script>
+
 {% endblock %}
 
 {% block content %}
+<div class="container">
+    <section class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-8">
+        
+            <div class="slogan block">
+                <h1>中文斷詞, 交給我!</h1>
+            </div>
 
-<input type="text" />
-<hr/>
-<div></div>
+            <div >
+                <input class="input-area block" type="text" />
+                
+            </div>
+            
+            <div class="res-wrap row block">
+                <div class="col-md-11">
+                    <div class="res-jieba"></div>
+                    <div class="res-ckip"></div>
+                </div>
+                <div class="col-md-1">
+                    <i class="block fa fa-spinner fa-spin loading-icon hide"></i>    
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            
+        </div>
+    </section>
+    <footer>
+        <span>by</span>
+        <a href="http://maxis1718.github.io" target="_blank">Maxis</a>
+    </footer>    
+</div>
+
 {% endblock %}

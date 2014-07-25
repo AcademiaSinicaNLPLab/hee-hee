@@ -1,7 +1,7 @@
 from flask import Flask, render_template, url_for, make_response, Response, jsonify, request
 import sys, json, os
 
-sys.path.append('/home/maxis/projects/hee-hee')
+sys.path.append('../')
 
 from ChineseTokenizer import ChineseTokenizer
 #from CKIPTokenizer import CKIPTokenizer
@@ -15,8 +15,9 @@ jieba_tknz = ChineseTokenizer()
 def render_index():
     return render_template( 'index.html' )
 
+@app.route('/api/tokenize/')
 @app.route('/api/tokenize/<text>/')
-def api_tokenize(text):
+def api_tokenize(text=""):
     #ckip_res  = ckip_tknz.tokenizeStr(text)
     jieba_res = jieba_tknz.tokenize(text)
     return jsonify({'raw':text, 'res':jieba_res, 'tokenizer':'jieba'})
