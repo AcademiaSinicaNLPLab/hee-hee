@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import pymongo, logging
+import pymongo, logging, json
 from collections import Counter
 
 class FeatureExtractor(object):
