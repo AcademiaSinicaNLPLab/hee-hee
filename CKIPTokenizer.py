@@ -68,7 +68,7 @@ class CKIPTokenizer:
 
         ## set logging level
         ## default level: INFO
-        loglevel = logging.DEBUG if 'verbose' in options and options['verbose'] == True else logging.INFO
+        loglevel = logging.DEBUG if 'verbose' in self.options and self.options['verbose'] == True else logging.INFO
         logging.basicConfig(format='[%(levelname)s] %(message)s', level=loglevel)
 
     @timeout(30)
@@ -114,6 +114,7 @@ if __name__ == "__main__":
     # print tknz.tokenizeStr('如果你需要時間好好冷靜的思考.......沒關係......我願意等你.......無論多久我都會等你........等你準備好了.........等你願意見我.......我不會再讓你擔心.......我也會按時吃飯........也會好好照顧自己.......你說的我都答應你........真的.......我說的都是真的.........請你相信 我.......... 小黑豬不會和小白豬分開的......就算有........也只是短暫的')
     
     # test sentence
+    print '我在臺灣清華大學念碩士'
     print tknz.tokenizeStr('我在臺灣清華大學念碩士')
 
 
