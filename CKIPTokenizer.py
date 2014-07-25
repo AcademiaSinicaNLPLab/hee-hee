@@ -34,7 +34,7 @@ def timeout(seconds=10, error_messages=os.strerror(errno.ETIME)):
     return decorator
 
 
-class Tokenizer:
+class CKIPTokenizer:
     """
     A python wrap for CKIP tokenizer under the client-server architecture.
     """
@@ -108,7 +108,7 @@ class Tokenizer:
 
 if __name__ == "__main__":
 
-    tknz = Tokenizer()
+    tknz = CKIPTokenizer()
 
     # bad sentence
     # print tknz.tokenizeStr('如果你需要時間好好冷靜的思考.......沒關係......我願意等你.......無論多久我都會等你........等你準備好了.........等你願意見我.......我不會再讓你擔心.......我也會按時吃飯........也會好好照顧自己.......你說的我都答應你........真的.......我說的都是真的.........請你相信 我.......... 小黑豬不會和小白豬分開的......就算有........也只是短暫的')
