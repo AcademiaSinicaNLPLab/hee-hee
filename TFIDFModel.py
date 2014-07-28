@@ -1,18 +1,34 @@
 # -*- coding: utf-8 -*-
 
 import pymongo
-# db = pymongo.Connection(config.mongo_addr)[config.db_name]
+import logging
+import os
+
 
 class TFIDFModel(object):
 	"""
+
 	"""
 	def __init__(self, **kwargs):
-		## check(and create if not existed) TFIDF cache path
 
-		self.cache_root = 'TFIDFModel' if 'cache_root' not in kwargs else kwargs['cache_root']
-		if not os.path.existed(self.cache_root): os.mkdir(self.cache_root)
 		# T: the universe of terms
 		# D: the universe of documents
+
+		## set logging default level: INFO
+		loglevel = logging.DEBUG if 'verbose' in kwargs and kwargs['verbose'] == True else logging.INFO
+		logging.basicConfig(format='[%(levelname)s] %(message)s', level=loglevel)
+
+
+		## check(and create if not existed) TFIDF cache path
+		self._cache_root = 'TFIDFModel' if 'cache_root' not in kwargs else kwargs['cache_root']
+		if not os.path.exists(self._cache_root): os.mkdir(self._cache_root)
+
+		## connect to mongo
+		logging.debug('connect to mongodb')
+		try:
+			self._db = pymongo.Connection(kwargs['mongo_addr'])[kwargs['db_name']]
+		except KeyError:
+			logging.error('mongo_addr and db_name are both necessary for create a mongo connection')
 
 	def build_f():
 		"""
@@ -20,7 +36,7 @@ class TFIDFModel(object):
 		Def:
 			f(d,t): the number of occurrences of term t in document d
 		"""
-		fn = os.path.join(self.cache_root, 'f.pkl')
+		fn = os.path.join(self._cache_root, 'f.pkl')
 		if not os.path.exists(fn):
 			# calculate F
 			# ...
@@ -36,7 +52,7 @@ class TFIDFModel(object):
 				  --> sum(f(d,t) / F(t)*ln(f(d,t)/F(t))) for d in D
 				  where F(t): the number of documents in D that contain term t
 		"""
-		fn = os.path.join(self.cache_root, 'n.pkl')
+		fn = os.path.join(self._cache_root, 'n.pkl')
 		if not os.path.exists(fn):
 			# calculate n
 			# ...
@@ -45,15 +61,13 @@ class TFIDFModel(object):
 		else:
 			self.n = pickle.load(open(fn, 'rb'))
 
-		# entropy of term t in D
-
 	def build_F():
 		"""
 		For IDF-1 (directly used), IDF-2 (in n(t)), IDF-3 (in n(t))
 		Def:
 			F(t): the number of documents in D that contain term t
 		"""
-		fn = os.path.join(self.cache_root, 'F.pkl')
+		fn = os.path.join(self._cache_root, 'F.pkl')
 		if not os.path.exists(fn):
 			# calculate F
 			# ...
@@ -69,7 +83,7 @@ class TFIDFModel(object):
 			|d|: cardinality (length) of d
 			|delta d|: average document length in D
 		"""
-		fn = os.path.join(self.cache_root, 'd.pkl')
+		fn = os.path.join(self._cache_root, 'd.pkl')
 		if not os.path.exists(fn):
 			# calculate F
 			# ...
@@ -79,4 +93,6 @@ class TFIDFModel(object):
 
 
 if __name__ == '__main__':
-	tfidf = TFIDFModel()
+
+
+	tfidf = TFIDFModel(mongo_addr="doraemon.iis.sinica.edu.tw", db_name="kimo")
