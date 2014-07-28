@@ -76,9 +76,11 @@ class TFIDFModel(object):
         """
         #co_sents = self._db['sents']
         n = 0
-        for sent in self._co_sents.find():
-           f_F = self.get_f(sent['usentID'], t) / self.get_F(t)
-           if f_F != 0: n += f_F * math.log(f_F)
+        F = self.get_F(t)
+        for i, sent in enumerate(self._co_sents.find()):
+            print str(i) + "\r",
+            f_F = self.get_f(sent['usentID'], t) / F
+            if f_F != 0: n += f_F * math.log(f_F)
         return n 
 
 
