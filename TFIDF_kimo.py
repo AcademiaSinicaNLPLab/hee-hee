@@ -40,6 +40,7 @@ class TFIDFModel(object):
         
         self._deltaD = 0
         self.d = None
+        self._maxN = -999999999
 
     def build_db(self):
         """
@@ -70,7 +71,10 @@ class TFIDFModel(object):
         Def:
             f(d,t): the number of occurrences of term t in document d
         """
-        return self._co_termcount.find({'term': t, 'emoID':str(d)})[0]['count']
+        f = self._co_termcount.find({'term': t, 'emoID': str(d)})
+        if f.count() == 0:
+            return 0
+        return f[0]['count']
 
 
     def get_n(self, t):
@@ -81,16 +85,17 @@ class TFIDFModel(object):
                   --> sum(f(d,t) / F(t)*ln(f(d,t)/F(t))) for d in D
                   where F(t): the number of documents in D that contain term t
         """
-        #co_sents = self._db['sents']
-        n = 0
-        F = self.get_F(t)
-        for i in xrange(1, 41):
-            print str(i) + "\r",
-            f_F = self.get_f(str(i), t) / F
-            if f_F != 0: n += f_F * math.log(f_F)
-        return n 
+       
+        if 'tfidf.n' not in self._db.collection_names():
+            self.calc_n()
+        else:
+            return self._db['tfidf.n'].find({'term': t})[0]['n']
 
-
+    def get_maxN(self):
+        if self._maxN == -999999999:
+            self._maxN = self._db['tfidf.n'].find().sort('n', pymongo.DESCENDING).limit(1)[0]['n'] 
+        
+        return self._maxN
 
     def get_F(self, t):
         """
@@ -131,6 +136,80 @@ class TFIDFModel(object):
                 total += self.get_d(i)
             self._deltaD = total / 40
         return self._deltaD
+
+    def calc_n(self):
+        """
+            calculate the entropy n of each distinct term in D
+        """
+        if 'tfidf.n' in self._db.collection_names():
+            print "n has been calculated"
+            return 
+        
+        co_n = self._db['tfidf.n']
+        termlist = self._co_termcount.distinct('term')
+        for term in termlist:
+            #print term + "/r",
+             
+            n = 0
+            F = self.get_F(t)
+            for i in xrange(1, 41):
+                #print self.get_f(str(i), t), F
+                f_F = self.get_f(str(i), t) / F
+                if f_F != 0: n += f_F * math.log(f_F)
+            
+            n = -n
+            mdoc = {
+                    'term': term,
+                    'n': n
+            }
+            co_n.insert(mdoc)
+    
+
+    def calc_tf(self, tftype):
+        """
+            calculate the tf value of each term
+        """
+
+        co_tf = self._db['tfidf.tf']
+        for i in xrange(1, 41):
+            print '----process emoID: ' + str(i) + ' -----------------'
+            for term in self._co_termcount.find({'emoID':str(i)}):
+                mdoc = {
+                        'term': term['term'],
+                        'docID': i,
+                        'tftype': tftype
+                }
+
+                f = self.get_f(i, term['term'])
+                if tftype == 1:
+                    tf = 1 + math.log(f, 2)
+                elif tftype == 2:
+                    tf = f /(f + self.get_d(i)/self.get_deltaD())
+                
+                mdoc['tf'] = tf
+                co_tf.insert(mdoc)
+       
+
+    def calc_idf(self, idftype):
+        """
+            calculate the idf value of each term
+        """
+
+        co_idf = self._db['tfidf.idf']
+        co_n = self._db['tfidf.n']
+        max_n = self.get_maxN()
+        for term in co_n.find():
+            mdoc = {
+                    'term': term['term'],
+                    'idftype': idftype
+            }
+            if idftype == 1:
+                idf = math.log(self._deltaD / self.get_F(term['term']))
+            elif idftype == 2:
+                idf = max_n - self.get_n(term['term'])
+            mdoc['idf'] = -idf
+            co_idf.insert(mdoc)
+
 
 
 if __name__ == '__main__':
