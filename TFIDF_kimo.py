@@ -6,6 +6,10 @@ import pymongo
 import logging
 import os, pickle
 import math
+import sys
+sys.path.append("pymodules")
+from mathutil import entropy
+
 
 from collections import defaultdict, Counter
 
@@ -163,7 +167,26 @@ class TFIDFModel(object):
                     'n': n
             }
             co_n.insert(mdoc)
-    
+   
+    def calc_entropy(self):
+        co_entropy = self._db['tfidf.entropy']
+        co_n = self._db['tfidf.n']
+        for term in co_n.find():
+            
+            result = self._co_termcount.find({'term': term['term']}).batch_size(40)
+            l = [0] * 40
+            for r in result:
+                l[int(r['emoID'])-1] = r['count']
+            #print l 
+            mdoc = {
+                    'term': term['term'],
+                    #'entropy': entropy([self.get_f(x, term['term']) for x in xrange(1, 41)])
+                    'entropy': entropy(l)
+            }
+            #for k, v in mdoc.iteritems():
+             #   print k, v,
+            co_entropy.insert(mdoc)
+
 
     def calc_tf(self, tftype):
         """
@@ -206,7 +229,7 @@ class TFIDFModel(object):
             if idftype == 1:
                 idf = math.log(self._deltaD / self.get_F(term['term']))
             elif idftype == 2:
-                idf = max_n - self.get_n(term['term'])
+                idf = max_n - term['n']
             mdoc['idf'] = -idf
             co_idf.insert(mdoc)
 
