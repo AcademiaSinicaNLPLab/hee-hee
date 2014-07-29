@@ -4,7 +4,7 @@ from __future__ import division
 
 import pymongo
 import logging
-import os
+import os, pickle
 import math
 
 from collections import defaultdict, Counter
@@ -49,11 +49,10 @@ class TFIDFModel(object):
         #co_sents = self._db['sents']
         for i in xrange(1, 41):
             c = Counter()
-            print '-------start process emoID: ' + str(i) + " --------------"
             for sents in self._co_sents.find({'emoID': str(i)}):
-                c += Counter(sents['sent'].split())
+                for w in sents['sent'].split():
+                    c[w] += 1
            
-            print '-------finish process emoID: ' + str(i) + "--------------"
             for k, v in c.iteritems():
                 mdoc = {
                         'emoID': sents['emoID'],
@@ -71,7 +70,7 @@ class TFIDFModel(object):
         Def:
             f(d,t): the number of occurrences of term t in document d
         """
-        return self._co_termcount.find({'term': t, 'emoID':d}).count()
+        return self._co_termcount.find({'term': t, 'emoID':str(d)})[0]['count']
 
 
     def get_n(self, t):
@@ -109,7 +108,7 @@ class TFIDFModel(object):
             |delta d|: average document length in D
         """
         if self.d is not None:
-            return self.d[t]
+            return self.d[d]
 
         fn = os.path.join(self._cache_root, 'd.pkl')
         if not os.path.exists(fn):
@@ -122,14 +121,15 @@ class TFIDFModel(object):
             pickle.dump(self.d, open(fn, 'wb'), pickle.HIGHEST_PROTOCOL)
         else:
             self.d = pickle.load(open(fn, 'rb'))        
-        return self.d[t]
+        return self.d[d]
 
 
     def get_deltaD(self):
         if self._deltaD == 0:
-            sents = self._co_sents.find(None, {'_id': 0, 'sent_length':1})
-            self._deltaD = sum(map(lambda x: x['sent_length'], sents))/sents.count()
-            print self._deltaD    
+            total = 0
+            for i in xrange(1, 41):
+                total += self.get_d(i)
+            self._deltaD = total / 40
         return self._deltaD
 
 
