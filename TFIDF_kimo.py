@@ -234,6 +234,28 @@ class TFIDFModel(object):
             co_idf.insert(mdoc)
 
 
+    def calc_idf_entropy(self, idftype):
+        """
+            calculate the idf value of each term
+        """
+
+        co_idf = self._db['tfidf.idf.entropy']
+        co_entropy = self._db['tfidf.entropy']
+        max_entropy = self._db['tfidf.entropy'].find().sort('entropy', pymongo.DESCENDING).limit(1)[0]['entropy']
+        for term in co_entropy.find().batch_size(1000):
+            mdoc = {
+                    'term': term['term'],
+                    'idftype': idftype
+            }
+            if idftype == 1:
+                idf = math.log(self._deltaD / self.get_F(term['term']))
+            elif idftype == 2:
+                idf = max_entropy - term['entropy']
+            mdoc['idf'] = idf
+            co_idf.insert(mdoc)
+
+
+
 
 if __name__ == '__main__':
 
