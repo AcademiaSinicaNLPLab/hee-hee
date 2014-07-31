@@ -19,3 +19,5 @@ if __name__ == '__main__':
             if (i+1) % 1000 == 0:
                 co.insert(buf)
                 buf = []
+        if len(buf) != 0:
+            co.insert(buf)
