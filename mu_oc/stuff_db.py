@@ -13,7 +13,7 @@ if __name__ == '__main__':
             mdoc = {
                     'first': l[0],
                     'second': l[1],
-                    'count': l[2]
+                    'count': int(l[2])
             }
             buf.append(mdoc)
             if (i+1) % 10000 == 0:
