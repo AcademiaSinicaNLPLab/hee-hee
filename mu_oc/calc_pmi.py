@@ -14,6 +14,7 @@ def oc(term):
     return sum(map(lambda x: x['count'], co_f.find({'term':term},{'_id':0, 'count':1}).batch_size(40)))
 
 
+
 if __name__ == '__main__':
     
     buf = []
@@ -33,7 +34,7 @@ if __name__ == '__main__':
 
         buf.append(mdoc)
 
-        if len(buf) % 10000 == 0:
+        if len(buf) % 1000 == 0:
             co_PMI.insert(buf)
             buf = []
             quick.clear()
