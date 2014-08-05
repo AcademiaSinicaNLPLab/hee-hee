@@ -16,19 +16,23 @@ if __name__ == '__main__':
     for emoID in xrange(1, 3):
         print '----- process emoID: ' + str(emoID) + ' -------------'
         feature = []
-        for data in co_sents.find({'emoID':str(emoID)}, {'sent':1}).batch_size(1000):
+        for i, data in enumerate(co_sents.find({'emoID':str(emoID)}, {'sent':1}).batch_size(100)):
+           
+            print '\r' + str(i),
+            sys.stdout.flush()
+           
             sent = data['sent']
             words = sent.strip().split()
             mdoc = {}
         
             for i, w in enumerate(words):
                 for j in xrange(i+1, len(words)):
-                    cursor = co_pmi.find({'first': words[i], 'second': words[j]}).limit(1)
-                    if cursor.count() != 0:
-                        mdoc[words[i]+'_'+words[j]] = cursor[0]['pmi']
+                    cursor = co_pmi.find_one({'first': words[i], 'second': words[j]}, {'_id':0, 'first':1, 'second':1, 'pmi':1})
+                    if cursor:
+                        mdoc[words[i]+'_'+words[j]] = cursor['pmi']
             
 #            for k, v in mdoc.iteritems():
-#               print k + '\t\t\t' + str(v)
+#                print k + '\t\t\t' + str(v)
 
             feature.append(mdoc)
         
