@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import pymongo
-import pickle
+import pickle, sys
 
 from sklearn.feature_extraction import DictVectorizer
 
-db = pymongo.Connection('doraemon.iis.sinica.edu.tw')
+db = pymongo.Connection('doraemon.iis.sinica.edu.tw')['kimo']
 co_sents = db['sents']
 co_pmi = db['pmi.trim']
 
@@ -21,15 +21,15 @@ if __name__ == '__main__':
             words = sent.strip().split()
             mdoc = {}
         
-            for i in enumerate(words):
+            for i, w in enumerate(words):
                 for j in xrange(i+1, len(words)):
                     cursor = co_pmi.find({'first': words[i], 'second': words[j]}).limit(1)
                     if cursor.count() != 0:
-                        mdoc[words[i]+'_'+words[j]]:cursor['pmi']
+                        mdoc[words[i]+'_'+words[j]] = cursor[0]['pmi']
             
-            print k, v in mdoc.iteritems():
-                print k, v, 
-        
+#            for k, v in mdoc.iteritems():
+#               print k + '\t\t\t' + str(v)
+
             feature.append(mdoc)
         
         pickle.dump(feature, open(emoID+'.pickle', 'w'), pickle.HIGHEST_PROTOCOL)
