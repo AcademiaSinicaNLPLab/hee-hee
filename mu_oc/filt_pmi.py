@@ -21,7 +21,7 @@ if __name__ == '__main__':
             quick[pair['first']] = oc(pair['first'])
         if quick[pair['second']] == 0:
             quick[pair['second']] = oc(pair['second'])
-        if pair['first'] > 1 and pair['second'] > 1:
+        if quick[pair['first']] > 1 and quick[pair['second']] > 1:
             mdoc = {
                     'first': pair['first'],
                     'second': pair['second'],
@@ -29,7 +29,7 @@ if __name__ == '__main__':
             }
             buf.append(mdoc)
 
-        if len(buf) > 1000:
+        if len(buf) >= 1000:
             co_fipmi.insert(buf)
             buf = []
             quick.clear()
