@@ -2,8 +2,7 @@
 
 import pymongo
 import pickle, sys
-
-from sklearn.feature_extraction import DictVectorizer
+import json, codecs
 
 db = pymongo.Connection('doraemon.iis.sinica.edu.tw')['kimo']
 co_sents = db['sents']
@@ -13,7 +12,7 @@ co_pmi = db['pmi.trim']
 
 if __name__ == '__main__':
     
-    for emoID in xrange(5, 41):
+    for emoID in xrange(8, 41):
         print '----- process emoID: ' + str(emoID) + ' -------------'
         feature = []
         for i, data in enumerate(co_sents.find({'emoID':str(emoID)}, {'sent':1}, timeout=False).batch_size(100)):
@@ -36,7 +35,12 @@ if __name__ == '__main__':
 
             feature.append(mdoc)
         
-        pickle.dump(feature, open(str(emoID)+'.pickle', 'w'), pickle.HIGHEST_PROTOCOL)
+        try:
+            pickle.dump(feature, open(str(emoID)+'.pickle', 'w'), pickle.HIGHEST_PROTOCOL)
+        except MemoryError:
+            print '----- emoID: ' + str(emoID) + ' failed :( ----------------'
+            json.dump(feature, codecs.open(str(emoID)+'.json', 'w', 'utf-8'))
+            
         del feature[:]
 
         print ' '
