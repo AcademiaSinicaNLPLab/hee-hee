@@ -4,43 +4,50 @@ import pymongo
 import pickle, sys
 import json, codecs
 
-db = pymongo.Connection('doraemon.iis.sinica.edu.tw')['kimo']
+db = pymongo.Connection('localhost')['kimo']
 co_sents = db['sents']
 co_pmi = db['pmi.trim']
+co_feature = db['feature.pmi']
 
 '''generate feature vector for training'''
 
 if __name__ == '__main__':
     
-    for emoID in xrange(8, 41):
+    buf = []
+
+    for emoID in xrange(1, 41):
         print '----- process emoID: ' + str(emoID) + ' -------------'
-        feature = []
-        for i, data in enumerate(co_sents.find({'emoID':str(emoID)}, {'sent':1}, timeout=False).batch_size(100)):
+        for i, data in enumerate(co_sents.find({'emoID':str(emoID)}, {'sent':1, 'emoID':1, 'usentID':1}, timeout=False).batch_size(1000)):
            
             print '\r' + str(i),
             sys.stdout.flush()
 
             sent = data['sent']
             words = sent.strip().split()
-            mdoc = {}
-        
+            mdoc = {
+                    'usentID': data['usentID'],
+                    'emoID': data['emoID']
+            }
+            
+            pmi_pair = {}
+            
             for i, w in enumerate(words):
                 for j in xrange(i+1, len(words)):
                     cursor = co_pmi.find_one({'first': words[i], 'second': words[j]}, {'_id':0, 'first':1, 'second':1, 'pmi':1})
                     if cursor:
-                        mdoc[words[i]+'_'+words[j]] = cursor['pmi']
+                        pmi_pair[words[i]+'_'+words[j]] = cursor['pmi']
             
-#            for k, v in mdoc.iteritems():
+#            for k, v in pmi_pair.iteritems():
 #                print k + '\t\t\t' + str(v)
 
-            feature.append(mdoc)
-        
-        try:
-            pickle.dump(feature, open(str(emoID)+'.pickle', 'w'), pickle.HIGHEST_PROTOCOL)
-        except MemoryError:
-            print '----- emoID: ' + str(emoID) + ' failed :( ----------------'
-            json.dump(feature, codecs.open(str(emoID)+'.json', 'w', 'utf-8'))
-            
-        del feature[:]
+            mdoc['feature'] = pmi_pair
+            buf.append(mdoc)
 
+            if len(buf) >= 100:
+                co_feature.insert(buf)
+                del buf[:]
+        
         print ' '
+
+    if len(buf) != 0:
+        co_feature.insert(buf)
