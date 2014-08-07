@@ -13,14 +13,14 @@ co_pmi = db['pmi.trim']
 
 if __name__ == '__main__':
     
-    for emoID in xrange(3, 41):
+    for emoID in xrange(5, 41):
         print '----- process emoID: ' + str(emoID) + ' -------------'
         feature = []
         for i, data in enumerate(co_sents.find({'emoID':str(emoID)}, {'sent':1}, timeout=False).batch_size(100)):
            
-            print '\r' + str(i) + '\t' + data['sent'],
+            print '\r' + str(i),
             sys.stdout.flush()
-           
+
             sent = data['sent']
             words = sent.strip().split()
             mdoc = {}
@@ -37,3 +37,6 @@ if __name__ == '__main__':
             feature.append(mdoc)
         
         pickle.dump(feature, open(str(emoID)+'.pickle', 'w'), pickle.HIGHEST_PROTOCOL)
+        del feature[:]
+
+        print ' '
