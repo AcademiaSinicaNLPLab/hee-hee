@@ -4,31 +4,36 @@ import pickle
 
 db = pymongo.Connection('localhost')['kimo']
 co_sents = db['sents']
-
+co_features = db['feature.pmi']
 
 if __name__ == '__main__':
 
-    emos = map(lambda x: co_sents.find({'emoID': str(x)}).count(), [x for x in xrange(1, 41)])
-    happy = emos[0]
-    total = sum(emos) - happy
+    indices = [x for x in xrange(0, 5624732)]
+    print 'haha'
+    happy = co_sents.find({'emoID':'1'}, {'emoID':1, 'usentID':1, '_id':0})
+    happy_len = happy.count()
+
+    del indices[4936337:5208195] 
+
+    random.shuffle(indices)
+    indices = indices[:happy_len]
+    
+    print happy_len, len(indices)
+
     picked_feature = []
     picked_value = []
 
-    for x in xrange(2, 41):
-        
-        with open(str(x)+'.pickle', 'r') as f:
-            feature = pickle.load(f)
+    for x, i in enumerate(indices):
+        print '\r' + str(x),
+        feature = co_features.find_one({'usentID':i})
+        picked_feature.append(feature['feature'])
+        picked_value.append(int(feature['emoID']))
 
-        print '---finish loading feature from emo: ' + str(x) + '-----'
-
-        num = happy * emos[x-1] / total
-        random.shuffle(feature)
-        picked_feature.extend(feature[:num])
-        picked_value.extend([x] * num)
-
-        del feature [:]
-
-
-    pickle.dumps(open('unhappy_feature.pickle', 'w'), picked_feature)
-    pickle.dumps(open('unhappy_value.pickle', 'w'), picked_value)
+    for i, x in enumerate(picked_value):
+        if i > 10:
+            break
+        print x
+    
+    pickle.dump(picked_feature, open('unhappy_feature.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
+    pickle.dump(picked_value, open('unhappy_value.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
 
