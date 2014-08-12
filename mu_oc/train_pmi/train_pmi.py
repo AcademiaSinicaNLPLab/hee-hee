@@ -12,11 +12,20 @@ if __name__ == '__main__':
 
     feature = []
     target = []
-    for x in xrange(1, 3):
-        pmi_list = pickle.load(open(str(x)+'.pickle', 'r'))
-        feature.extend(pmi_list)
-        target.extend([x] * len(pmi_list))
     
+    feature.extend(pickle.load(open('happy_feature.pickle', 'rb')))
+    happy_len = len(feature)
+    print happy_len
+    feature.extend(pickle.load(open('unhappy_feature.pickle', 'rb')))
+    
+    #target.extend(pickle.load(open('happy_value.pickle', 'rb')))
+    #target.extend(pickle.load(open('unhappy_value.pickle', 'rb')))
+
+    target.extend([1] * happy_len)
+    target.extend([0] * happy_len)
+
+    print len(target)
+
     print '---finish loading feature list---'
 
     vec = DictVectorizer()
@@ -41,7 +50,7 @@ if __name__ == '__main__':
         X_train = scaler.transform(X_train)
         X_test = scaler.transform(X_test)
         
-        clf = SGDClassifier(loss='hinge', penalty='elasticnet', shuffle=True)
+        clf = SGDClassifier(loss='hinge', penalty='l2')
         clf.fit(X_train, y_train)
         print '---finish training------'
         score = clf.score(X_test, y_test)
