@@ -9,7 +9,7 @@ co_sents = db['sents']
 co_pmi = db['pmi.trim']
 co_feature = db['feature.pmi']
 
-'''generate feature vector for training'''
+'''generate feature vector for training and insert into database'''
 
 if __name__ == '__main__':
     
